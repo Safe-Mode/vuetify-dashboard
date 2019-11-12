@@ -1,17 +1,28 @@
 <template>
   <div>
     <h1>Dashboard</h1>
-    <v-data-table
-      :headers="headers"
-      :items="employees"
-      :items-per-page="5"
-      :multi-sort="true"
-      class="elevation-1"
-      @click:row="selectRow"
-    ></v-data-table>
+
+    <SalesGraph
+      v-for="sale in sales"
+      :key="`${sale.title}`"
+      :sale="sale"
+    ></SalesGraph>
+
+    <StatisticCard
+      v-for="stat in statistics"
+      :key="`${stat.title}`"
+      :statistic="stat"
+    ></StatisticCard>
+
+    <EmployeesTable
+      :employees="employees"
+      @selectEmployee="setEmployee"
+    ></EmployeesTable>
+
+    <EventTimeline :timeline="timeline"></EventTimeline>
 
     <v-snackbar v-model="snackbar">
-      {{ currentItem.name }} - {{ currentItem.title }}
+      {{ selectedEmployee.name }} - {{ selectedEmployee.title }}
       <v-btn color="pink" text @click="snackbar = false">
         Close
       </v-btn>
@@ -20,40 +31,53 @@
 </template>
 
 <script>
+import SalesGraph from '@/components/SalesGraph'
+import EmployeesTable from '@/components/EmployeesTable'
+import StatisticCard from '@/components/StatisticCard'
+import EventTimeline from '@/components/EventTimeline'
+
 export default {
   name: 'Dashboard',
   data: () => ({
-    currentItem: '',
+    selectedEmployee: {
+      name: '',
+      title: ''
+    },
     snackbar: false,
-    headers: [
-      {
-        text: 'ID',
-        align: 'left',
-        sortable: false,
-        value: 'id'
-      },
-      { text: 'Name', value: 'name' },
-      { text: 'Title', value: 'title' },
-      { text: 'Salary ($)', value: 'salary' }
-    ],
-    employees: []
+    employees: [],
+    sales: [],
+    statistics: [],
+    timeline: []
   }),
+  components: {
+    SalesGraph,
+    EmployeesTable,
+    StatisticCard,
+    EventTimeline
+  },
   methods: {
-    selectRow(evt) {
+    fetchData(pathName) {
+      fetch(`http://localhost:3000/${pathName}`, {
+        method: 'GET'
+      })
+        .then(response => {
+          return response.json()
+        })
+        .then(data => {
+          this[pathName] = data
+        })
+    },
+    setEmployee(evt) {
       this.snackbar = true
-      this.currentItem = evt
+      this.selectedEmployee.name = evt.name
+      this.selectedEmployee.title = evt.title
     }
   },
   created() {
-    fetch('http://localhost:3000/employees', {
-      method: 'GET'
-    })
-      .then(response => {
-        return response.json()
-      })
-      .then(data => {
-        this.employees = data
-      })
+    this.fetchData('employees')
+    this.fetchData('sales')
+    this.fetchData('statistics')
+    this.fetchData('timeline')
   }
 }
 </script>

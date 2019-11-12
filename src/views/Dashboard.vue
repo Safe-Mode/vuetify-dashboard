@@ -18,7 +18,7 @@
       <v-col cols="8">
         <EmployeesTable
           :employees="employees"
-          @selectEmployee="setEmployee"
+          @select-employee="setEmployee"
         ></EmployeesTable>
       </v-col>
 

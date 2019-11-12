@@ -45,7 +45,7 @@ export default {
         title: evt.title
       }
 
-      this.$emit('select-emplyee', employee)
+      this.$emit('select-employee', employee)
     }
   }
 }

@@ -4,8 +4,13 @@
       <v-col>
         <h1>Signup</h1>
 
-        <v-form>
-          <v-text-field type="email" label="Email"></v-text-field>
+        <v-form ref="signUpForm" v-model="formValidity">
+          <v-text-field
+            type="email"
+            label="Email"
+            v-model="email"
+            :rules="emailRules"
+          ></v-text-field>
 
           <v-autocomplete
             label="Which browser do you use?"
@@ -41,9 +46,35 @@
             ></v-date-picker>
           </v-menu>
 
-          <v-checkbox label="Agree to terms and conditions"></v-checkbox>
+          <v-checkbox
+            label="Agree to terms and conditions"
+            v-model="agreeToTerms"
+            :rules="agreeToTermsRules"
+            required
+          ></v-checkbox>
 
-          <v-btn type="submit" color="primary">Submit</v-btn>
+          <v-btn
+            type="submit"
+            color="primary"
+            class="mr-4"
+            :disabled="!formValidity"
+            >Submit</v-btn
+          >
+          <v-btn
+            type="button"
+            color="success"
+            class="mr-4"
+            @click="validateForm"
+            >Validate</v-btn
+          >
+          <v-btn
+            type="button"
+            color="warning"
+            class="mr-4"
+            @click="resetValidation"
+            >Reset Validation</v-btn
+          >
+          <v-btn type="reset" color="error" @click="resetForm">Reset</v-btn>
         </v-form>
       </v-col>
     </v-row>
@@ -54,9 +85,28 @@
 export default {
   name: 'Signup',
   data: () => ({
+    email: '',
+    emailRules: [
+      value => value.indexOf('@') !== 0 || 'Email should have a username.',
+      value => value.includes('@') || 'Email should include an @ symbol.',
+      value =>
+        value.indexOf('.') - value.indexOf('@') > 1 ||
+        'Email should contain a valid domain.',
+      value => value.includes('.') || 'Email should include a period symbol.',
+      value =>
+        value.indexOf('.') <= value.length - 3 ||
+        'Email should contain a valid domain extension.'
+    ],
     browsers: ['Chrome', 'Firefox', 'Safari', 'Edge', 'Brave'],
     date: null,
-    menu: false
+    menu: false,
+    agreeToTerms: false,
+    agreeToTermsRules: [
+      value =>
+        !!value ||
+        'You must agree to the terms and conditions to sign up for an account.'
+    ],
+    formValidity: false
   }),
   watch: {
     menu(val) {
@@ -66,6 +116,15 @@ export default {
   methods: {
     save(date) {
       this.$refs.menu.save(date)
+    },
+    resetForm() {
+      this.$refs.signUpForm.reset()
+    },
+    resetValidation() {
+      this.$refs.signUpForm.resetValidation()
+    },
+    validateForm() {
+      this.$refs.signUpForm.validate()
     }
   }
 }
